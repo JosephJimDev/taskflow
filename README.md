@@ -136,6 +136,6 @@ TaskFlow successfully demonstrates the application of the Software Development L
 - 24/15932
 
 ### rep link
-[Rep link](https://github.com/JosephJimDev/taskflow)
-[site link](https://josephjimdev.github.io/taskflow/)
+- [Rep link](https://github.com/JosephJimDev/taskflow)
+- [site link](https://josephjimdev.github.io/taskflow/)
 
