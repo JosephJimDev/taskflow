@@ -108,7 +108,7 @@ Future improvements may include:
 
 ---
 
-Project Structure
+### Project Structure
 TaskFlow/
 │
 ├── main.cpp
@@ -117,21 +117,21 @@ TaskFlow/
 ├── TaskManager.cpp
 └── README.md
 
-Limitations
+### Limitations
 
-Data is not persisted after program termination
+- Data is not persisted after program termination
 
-Single-user system
+- Single-user system
 
-Console-based interface only
+- Console-based interface only
 
-Conclusion
+### Conclusion
 
 TaskFlow successfully demonstrates the application of the Software Development Life Cycle (SDLC) in building a functional software system. The project meets all defined objectives and serves as a solid foundation for further enhancements.
 
-Author
+### Author
 
-Name: Joseph Jim
-Course: Computer Science / Software Engineering
-Level: 100 Level
-Institution: (Add your institution name here)
+- -Name: Jim Joseph Onyedikachi
+- Course: Computer Science
+- 24/15932
+
