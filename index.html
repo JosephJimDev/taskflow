@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow - Task Management Reimagined</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --background: 222 47% 6%;
+        --foreground: 210 40% 98%;
+        --card: 222 47% 8%;
+        --card-foreground: 210 40% 98%;
+        --primary: 217 91% 60%;
+        --primary-foreground: 222 47% 6%;
+        --secondary: 217 33% 17%;
+        --secondary-foreground: 210 40% 98%;
+        --muted: 217 33% 17%;
+        --muted-foreground: 215 20% 65%;
+        --accent: 280 85% 65%;
+        --accent-foreground: 210 40% 98%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 210 40% 98%;
+        --success: 142 76% 36%;
+        --success-foreground: 210 40% 98%;
+        --warning: 38 92% 50%;
+        --warning-foreground: 222 47% 6%;
+        --border: 217 33% 17%;
+        --ring: 217 91% 60%;
+        --radius: 0.75rem;
+        --glass-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        --gradient-primary: linear-gradient(
+          135deg,
+          hsl(217 91% 60%),
+          hsl(280 85% 65%)
+        );
+        --gradient-mesh: radial-gradient(
+            at 40% 20%,
+            hsl(217 91% 60% / 0.15) 0px,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 80% 0%,
+            hsl(280 85% 65% / 0.1) 0px,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 0% 50%,
+            hsl(142 76% 36% / 0.08) 0px,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 80% 50%,
+            hsl(217 91% 60% / 0.1) 0px,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 0% 100%,
+            hsl(280 85% 65% / 0.1) 0px,
+            transparent 50%
+          );
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .mesh-gradient {
+        background-color: hsl(var(--background));
+        background-image: var(--gradient-mesh);
+        min-height: 100vh;
+      }
+
+      .glass {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow);
+        border-radius: var(--radius);
+      }
+
+      .glass-subtle {
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius);
+      }
+
+      .text-gradient {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .container {
+        max-width: 1152px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        position: relative;
+        z-index: 10;
+      }
+
+      /* Floating orbs */
+      .floating-orbs {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(48px);
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .orb-1 {
+        top: 5rem;
+        left: 2.5rem;
+        width: 18rem;
+        height: 18rem;
+        background: hsl(var(--primary) / 0.2);
+      }
+
+      .orb-2 {
+        bottom: 5rem;
+        right: 2.5rem;
+        width: 24rem;
+        height: 24rem;
+        background: hsl(var(--accent) / 0.2);
+        animation-delay: 2s;
+      }
+
+      .orb-3 {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 16rem;
+        height: 16rem;
+        background: hsl(var(--success) / 0.1);
+        animation-delay: 4s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(5deg);
+        }
+      }
+
+      /* Header */
+      header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeIn 0.6s ease-out;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+      }
+
+      .badge svg {
+        width: 1rem;
+        height: 1rem;
+        color: hsl(var(--primary));
+      }
+
+      h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+
+      header p {
+        font-size: 1.125rem;
+        color: hsl(var(--muted-foreground));
+        max-width: 28rem;
+        margin: 0 auto;
+      }
+
+      /* Grid Layout */
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      @media (min-width: 1024px) {
+        .main-grid {
+          grid-template-columns: 2fr 1fr;
+        }
+      }
+
+      .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      /* Glass Card */
+      .card {
+        padding: 1.5rem;
+      }
+
+      /* Add Todo Form */
+      .add-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .input-wrapper {
+        position: relative;
+      }
+
+      .input-wrapper svg {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.25rem;
+        height: 1.25rem;
+        color: hsl(var(--primary));
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        background: hsl(var(--secondary) / 0.5);
+        border: 1px solid transparent;
+        border-radius: var(--radius);
+        color: hsl(var(--foreground));
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.2s;
+      }
+
+      input[type="text"]:focus,
+      textarea:focus {
+        outline: none;
+        border-color: hsl(var(--primary) / 0.5);
+        background: hsl(var(--secondary) / 0.7);
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: hsl(var(--muted-foreground));
+      }
+
+      textarea {
+        padding-left: 1rem;
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+
+      select {
+        padding: 0.5rem 1rem;
+        background: hsl(var(--secondary) / 0.5);
+        border: none;
+        border-radius: var(--radius);
+        color: hsl(var(--foreground));
+        font-size: 0.875rem;
+        font-family: inherit;
+        cursor: pointer;
+        min-width: 120px;
+      }
+
+      select:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
+      }
+
+      .btn {
+        padding: 0.625rem 1.25rem;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+      }
+
+      .btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: hsl(var(--muted-foreground));
+      }
+
+      .btn-ghost:hover {
+        background: hsl(var(--secondary) / 0.5);
+      }
+
+      /* Filter Bar */
+      .filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+
+      .filter-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: hsl(var(--muted-foreground));
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .filter-label svg {
+        width: 1rem;
+        height: 1rem;
+      }
+
+      .filter-bar select {
+        height: 2.25rem;
+      }
+
+      .clear-filters {
+        font-size: 0.875rem;
+        color: hsl(var(--primary));
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-decoration: underline;
+        font-family: inherit;
+      }
+
+      /* Todo List */
+      .todo-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .todo-item {
+        padding: 1rem;
+        transition: all 0.3s;
+        animation: slideUp 0.3s ease-out;
+      }
+
+      .todo-item:hover {
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .todo-item.completed {
+        opacity: 0.6;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .todo-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .checkbox {
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        border: 2px solid hsl(var(--muted-foreground) / 0.3);
+        background: transparent;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+        transition: all 0.3s;
+      }
+
+      .checkbox:hover {
+        border-color: hsl(var(--primary));
+        background: hsl(var(--primary) / 0.1);
+      }
+
+      .checkbox.checked {
+        background: hsl(var(--primary));
+        border-color: hsl(var(--primary));
+      }
+
+      .checkbox svg {
+        width: 1rem;
+        height: 1rem;
+        color: white;
+        display: none;
+      }
+
+      .checkbox.checked svg {
+        display: block;
+      }
+
+      .todo-details {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .todo-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .todo-header .icon {
+        font-size: 1.125rem;
+      }
+
+      .todo-title {
+        font-weight: 500;
+        color: hsl(var(--foreground));
+        transition: all 0.3s;
+      }
+
+      .todo-item.completed .todo-title {
+        text-decoration: line-through;
+        color: hsl(var(--muted-foreground));
+      }
+
+      .todo-description {
+        font-size: 0.875rem;
+        color: hsl(var(--muted-foreground));
+        margin-bottom: 0.75rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .todo-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .priority-badge {
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        border: 1px solid;
+      }
+
+      .priority-high {
+        background: hsl(var(--destructive) / 0.1);
+        color: hsl(var(--destructive));
+        border-color: hsl(var(--destructive) / 0.3);
+      }
+
+      .priority-medium {
+        background: hsl(var(--warning) / 0.1);
+        color: hsl(var(--warning));
+        border-color: hsl(var(--warning) / 0.3);
+      }
+
+      .priority-low {
+        background: hsl(var(--success) / 0.1);
+        color: hsl(var(--success));
+        border-color: hsl(var(--success) / 0.3);
+      }
+
+      .due-date {
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        background: hsl(var(--secondary));
+        color: hsl(var(--muted-foreground));
+      }
+
+      .due-date svg {
+        width: 0.75rem;
+        height: 0.75rem;
+      }
+
+      .due-date.overdue {
+        background: hsl(var(--destructive) / 0.1);
+        color: hsl(var(--destructive));
+      }
+
+      .delete-btn {
+        padding: 0.5rem;
+        border-radius: var(--radius);
+        background: transparent;
+        border: none;
+        color: hsl(var(--muted-foreground));
+        cursor: pointer;
+        opacity: 0;
+        transition: all 0.2s;
+      }
+
+      .todo-item:hover .delete-btn {
+        opacity: 1;
+      }
+
+      .delete-btn:hover {
+        color: hsl(var(--destructive));
+        background: hsl(var(--destructive) / 0.1);
+      }
+
+      .delete-btn svg {
+        width: 1rem;
+        height: 1rem;
+      }
+
+      /* Progress Ring */
+      .progress-card {
+        text-align: center;
+      }
+
+      .progress-card h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+      }
+
+      .progress-ring-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .progress-ring {
+        transform: rotate(-90deg);
+      }
+
+      .progress-ring .bg {
+        fill: none;
+        stroke: hsl(var(--secondary));
+        stroke-width: 8;
+      }
+
+      .progress-ring .progress {
+        fill: none;
+        stroke: url(#progressGradient);
+        stroke-width: 8;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.5s ease-out;
+      }
+
+      .progress-text {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .progress-percent {
+        font-size: 1.875rem;
+        font-weight: 700;
+      }
+
+      .progress-label {
+        font-size: 0.75rem;
+        color: hsl(var(--muted-foreground));
+      }
+
+      .progress-summary {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        color: hsl(var(--muted-foreground));
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+
+      .stat-card {
+        padding: 1rem;
+        animation: slideUp 0.3s ease-out backwards;
+      }
+
+      .stat-card:nth-child(1) {
+        animation-delay: 0ms;
+      }
+      .stat-card:nth-child(2) {
+        animation-delay: 100ms;
+      }
+      .stat-card:nth-child(3) {
+        animation-delay: 200ms;
+      }
+      .stat-card:nth-child(4) {
+        animation-delay: 300ms;
+      }
+
+      .stat-icon {
+        width: 2rem;
+        height: 2rem;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-icon svg {
+        width: 1rem;
+        height: 1rem;
+      }
+
+      .stat-icon.primary {
+        background: hsl(var(--primary) / 0.1);
+        color: hsl(var(--primary));
+      }
+
+      .stat-icon.success {
+        background: hsl(var(--success) / 0.1);
+        color: hsl(var(--success));
+      }
+
+      .stat-icon.destructive {
+        background: hsl(var(--destructive) / 0.1);
+        color: hsl(var(--destructive));
+      }
+
+      .stat-icon.warning {
+        background: hsl(var(--warning) / 0.1);
+        color: hsl(var(--warning));
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: hsl(var(--muted-foreground));
+      }
+
+      /* Tips Card */
+      .tips-card h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+
+      .tips-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .tips-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: hsl(var(--muted-foreground));
+      }
+
+      .tips-list li span {
+        color: hsl(var(--primary));
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        margin-top: 3rem;
+        padding: 1.5rem;
+        font-size: 0.875rem;
+        color: hsl(var(--muted-foreground));
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+      }
+
+      .empty-icon {
+        width: 4rem;
+        height: 4rem;
+        margin: 0 auto 1rem;
+        color: hsl(var(--muted-foreground));
+        opacity: 0.5;
+      }
+
+      .empty-state h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .empty-state p {
+        color: hsl(var(--muted-foreground));
+        font-size: 0.875rem;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mesh-gradient">
+      <!-- Floating Orbs -->
+      <div class="floating-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+      </div>
+
+      <div class="container">
+        <!-- Header -->
+        <header>
+          <div class="badge glass-subtle">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"
+              />
+              <path d="M5 3v4" />
+              <path d="M19 17v4" />
+              <path d="M3 5h4" />
+              <path d="M17 19h4" />
+            </svg>
+            <span>Task Management Reimagined</span>
+          </div>
+          <h1><span class="text-gradient">TaskFlow</span></h1>
+          <p>
+            Organize your life with clarity. A beautiful way to manage your
+            daily tasks.
+          </p>
+        </header>
+
+        <div class="main-grid">
+          <!-- Main Content -->
+          <div class="main-content">
+            <!-- Add Todo Form -->
+            <div class="glass card">
+              <form class="add-form" id="todoForm">
+                <div class="input-wrapper">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M8 12h8" />
+                    <path d="M12 8v8" />
+                  </svg>
+                  <input
+                    type="text"
+                    id="todoTitle"
+                    placeholder="What needs to be done?"
+                    required
+                  />
+                </div>
+                <textarea
+                  id="todoDescription"
+                  placeholder="Add a description (optional)"
+                ></textarea>
+                <div class="form-row">
+                  <select id="todoPriority">
+                    <option value="low">🟢 Low</option>
+                    <option value="medium" selected>🟡 Medium</option>
+                    <option value="high">🔴 High</option>
+                  </select>
+                  <select id="todoCategory">
+                    <option value="personal">🏠 Personal</option>
+                    <option value="work">💼 Work</option>
+                    <option value="health">💪 Health</option>
+                    <option value="learning">📚 Learning</option>
+                    <option value="other">📌 Other</option>
+                  </select>
+                  <input
+                    type="date"
+                    id="todoDueDate"
+                    style="
+                      padding: 0.5rem 1rem;
+                      background: hsl(var(--secondary) / 0.5);
+                      border: none;
+                      border-radius: var(--radius);
+                      color: hsl(var(--foreground));
+                      font-size: 0.875rem;
+                    "
+                  />
+                  <button type="submit" class="btn btn-primary">
+                    Add Task
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="glass filter-bar">
+              <div class="filter-label">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon
+                    points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"
+                  />
+                </svg>
+                <span>Filters</span>
+              </div>
+              <select id="filterStatus">
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+              </select>
+              <select id="filterCategory">
+                <option value="all">All Categories</option>
+                <option value="personal">🏠 Personal</option>
+                <option value="work">💼 Work</option>
+                <option value="health">💪 Health</option>
+                <option value="learning">📚 Learning</option>
+                <option value="other">📌 Other</option>
+              </select>
+              <select id="filterPriority">
+                <option value="all">All Priorities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+              <button
+                class="clear-filters"
+                id="clearFilters"
+                style="display: none"
+              >
+                Clear filters
+              </button>
+            </div>
+
+            <!-- Todo List -->
+            <div class="todo-list" id="todoList"></div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="sidebar">
+            <!-- Progress Card -->
+            <div class="glass card progress-card">
+              <h3>Today's Progress</h3>
+              <div class="progress-ring-wrapper">
+                <svg class="progress-ring" width="120" height="120">
+                  <defs>
+                    <linearGradient
+                      id="progressGradient"
+                      x1="0%"
+                      y1="0%"
+                      x2="100%"
+                      y2="100%"
+                    >
+                      <stop offset="0%" stop-color="hsl(217, 91%, 60%)" />
+                      <stop offset="100%" stop-color="hsl(280, 85%, 65%)" />
+                    </linearGradient>
+                  </defs>
+                  <circle class="bg" cx="60" cy="60" r="52" />
+                  <circle
+                    class="progress"
+                    id="progressCircle"
+                    cx="60"
+                    cy="60"
+                    r="52"
+                    stroke-dasharray="326.73"
+                    stroke-dashoffset="326.73"
+                  />
+                </svg>
+                <div class="progress-text">
+                  <span
+                    class="progress-percent text-gradient"
+                    id="progressPercent"
+                    >0%</span
+                  >
+                  <span class="progress-label">Complete</span>
+                </div>
+              </div>
+              <p class="progress-summary" id="progressSummary">
+                0 of 0 tasks completed
+              </p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+              <div class="glass-subtle stat-card">
+                <div class="stat-icon primary">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                  </svg>
+                </div>
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Total</div>
+              </div>
+              <div class="glass-subtle stat-card">
+                <div class="stat-icon success">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                </div>
+                <div class="stat-value" id="statCompleted">0</div>
+                <div class="stat-label">Completed</div>
+              </div>
+              <div class="glass-subtle stat-card">
+                <div class="stat-icon destructive">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
+                    />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </div>
+                <div class="stat-value" id="statHighPriority">0</div>
+                <div class="stat-label">High Priority</div>
+              </div>
+              <div class="glass-subtle stat-card">
+                <div class="stat-icon warning">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </div>
+                <div class="stat-value" id="statDueSoon">0</div>
+                <div class="stat-label">Due Soon</div>
+              </div>
+            </div>
+
+            <!-- Tips Card -->
+            <div class="glass card tips-card">
+              <h3>Quick Tips</h3>
+              <ul class="tips-list">
+                <li><span>•</span> Click the circle to mark tasks complete</li>
+                <li><span>•</span> Set priorities to focus on what matters</li>
+                <li><span>•</span> Use categories to organize your tasks</li>
+                <li><span>•</span> Add due dates to never miss deadlines</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <footer>
+          <p>
+            Built by Jim Joseph Onyedikachi <br />
+            24/15932 <br />
+            Computer Science
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      // Category icons map
+      const categoryIcons = {
+        personal: "🏠",
+        work: "💼",
+        health: "💪",
+        learning: "📚",
+        other: "📌",
+      };
+
+      // Initial sample todos
+      let todos = [
+        {
+          id: "1",
+          title: "Review project documentation",
+          description: "Go through the latest updates and provide feedback",
+          priority: "high",
+          category: "work",
+          completed: false,
+          dueDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "2",
+          title: "Morning workout",
+          description: "30 minutes cardio and strength training",
+          priority: "medium",
+          category: "health",
+          completed: true,
+          dueDate: new Date().toISOString().split("T")[0],
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "3",
+          title: "Learn TypeScript generics",
+          description: "Complete the advanced TypeScript course module",
+          priority: "low",
+          category: "learning",
+          completed: false,
+          dueDate: new Date(Date.now() + 172800000).toISOString().split("T")[0],
+          createdAt: new Date().toISOString(),
+        },
+      ];
+
+      let filter = { status: "all", category: "all", priority: "all" };
+
+      // DOM Elements
+      const todoForm = document.getElementById("todoForm");
+      const todoList = document.getElementById("todoList");
+      const filterStatus = document.getElementById("filterStatus");
+      const filterCategory = document.getElementById("filterCategory");
+      const filterPriority = document.getElementById("filterPriority");
+      const clearFiltersBtn = document.getElementById("clearFilters");
+
+      // Format due date
+      function formatDueDate(dateStr) {
+        if (!dateStr) return "";
+        const date = new Date(dateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        if (date.toDateString() === today.toDateString()) return "Today";
+        if (date.toDateString() === tomorrow.toDateString()) return "Tomorrow";
+        return date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      // Check if overdue
+      function isOverdue(dateStr, completed) {
+        if (!dateStr || completed) return false;
+        const date = new Date(dateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return date < today;
+      }
+
+      // Render todo item
+      function renderTodoItem(todo) {
+        const overdue = isOverdue(todo.dueDate, todo.completed);
+        return `
+        <div class="glass-subtle todo-item ${
+          todo.completed ? "completed" : ""
+        }" data-id="${todo.id}">
+          <div class="todo-content">
+            <button class="checkbox ${
+              todo.completed ? "checked" : ""
+            }" onclick="toggleTodo('${todo.id}')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <div class="todo-details">
+              <div class="todo-header">
+                <span class="icon">${categoryIcons[todo.category]}</span>
+                <span class="todo-title">${todo.title}</span>
+              </div>
+              ${
+                todo.description
+                  ? `<p class="todo-description">${todo.description}</p>`
+                  : ""
+              }
+              <div class="todo-meta">
+                <span class="priority-badge priority-${todo.priority}">${
+          todo.priority.charAt(0).toUpperCase() + todo.priority.slice(1)
+        }</span>
+                ${
+                  todo.dueDate
+                    ? `
+                  <span class="due-date ${overdue ? "overdue" : ""}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${
+                      overdue
+                        ? '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'
+                        : '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'
+                    }</svg>
+                    ${formatDueDate(todo.dueDate)}
+                  </span>
+                `
+                    : ""
+                }
+              </div>
+            </div>
+            <button class="delete-btn" onclick="deleteTodo('${todo.id}')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+      }
+
+      // Render empty state
+      function renderEmptyState() {
+        return `
+        <div class="glass card empty-state">
+          <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <h3>No tasks yet</h3>
+          <p>Add your first task above to get started!</p>
+        </div>
+      `;
+      }
+
+      // Filter todos
+      function getFilteredTodos() {
+        return todos.filter((todo) => {
+          if (filter.status === "active" && todo.completed) return false;
+          if (filter.status === "completed" && !todo.completed) return false;
+          if (filter.category !== "all" && todo.category !== filter.category)
+            return false;
+          if (filter.priority !== "all" && todo.priority !== filter.priority)
+            return false;
+          return true;
+        });
+      }
+
+      // Calculate stats
+      function getStats() {
+        const total = todos.length;
+        const completed = todos.filter((t) => t.completed).length;
+        const highPriority = todos.filter(
+          (t) => t.priority === "high" && !t.completed
+        ).length;
+        const twoDaysFromNow = new Date();
+        twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
+        const dueSoon = todos.filter((t) => {
+          if (!t.dueDate || t.completed) return false;
+          return new Date(t.dueDate) <= twoDaysFromNow;
+        }).length;
+        return { total, completed, highPriority, dueSoon };
+      }
+
+      // Update UI
+      function render() {
+        const filteredTodos = getFilteredTodos();
+        const stats = getStats();
+
+        // Render todo list
+        if (filteredTodos.length === 0) {
+          todoList.innerHTML = renderEmptyState();
+        } else {
+          todoList.innerHTML = filteredTodos.map(renderTodoItem).join("");
+        }
+
+        // Update stats
+        document.getElementById("statTotal").textContent = stats.total;
+        document.getElementById("statCompleted").textContent = stats.completed;
+        document.getElementById("statHighPriority").textContent =
+          stats.highPriority;
+        document.getElementById("statDueSoon").textContent = stats.dueSoon;
+
+        // Update progress ring
+        const completionRate =
+          stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
+        const circumference = 2 * Math.PI * 52;
+        const offset = circumference - (completionRate / 100) * circumference;
+        document.getElementById("progressCircle").style.strokeDashoffset =
+          offset;
+        document.getElementById("progressPercent").textContent =
+          Math.round(completionRate) + "%";
+        document.getElementById(
+          "progressSummary"
+        ).textContent = `${stats.completed} of ${stats.total} tasks completed`;
+
+        // Show/hide clear filters button
+        const hasFilters =
+          filter.status !== "all" ||
+          filter.category !== "all" ||
+          filter.priority !== "all";
+        clearFiltersBtn.style.display = hasFilters ? "inline" : "none";
+      }
+
+      // Add todo
+      todoForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const title = document.getElementById("todoTitle").value.trim();
+        if (!title) return;
+
+        const newTodo = {
+          id: Date.now().toString(),
+          title,
+          description: document.getElementById("todoDescription").value.trim(),
+          priority: document.getElementById("todoPriority").value,
+          category: document.getElementById("todoCategory").value,
+          dueDate: document.getElementById("todoDueDate").value,
+          completed: false,
+          createdAt: new Date().toISOString(),
+        };
+
+        todos.unshift(newTodo);
+        todoForm.reset();
+        document.getElementById("todoPriority").value = "medium";
+        render();
+      });
+
+      // Toggle todo
+      window.toggleTodo = function (id) {
+        todos = todos.map((t) =>
+          t.id === id ? { ...t, completed: !t.completed } : t
+        );
+        render();
+      };
+
+      // Delete todo
+      window.deleteTodo = function (id) {
+        todos = todos.filter((t) => t.id !== id);
+        render();
+      };
+
+      // Filter handlers
+      filterStatus.addEventListener("change", (e) => {
+        filter.status = e.target.value;
+        render();
+      });
+
+      filterCategory.addEventListener("change", (e) => {
+        filter.category = e.target.value;
+        render();
+      });
+
+      filterPriority.addEventListener("change", (e) => {
+        filter.priority = e.target.value;
+        render();
+      });
+
+      clearFiltersBtn.addEventListener("click", () => {
+        filter = { status: "all", category: "all", priority: "all" };
+        filterStatus.value = "all";
+        filterCategory.value = "all";
+        filterPriority.value = "all";
+        render();
+      });
+
+      // Initial render
+      render();
+    </script>
+  </body>
+</html>
